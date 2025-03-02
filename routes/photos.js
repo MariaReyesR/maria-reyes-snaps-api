@@ -27,7 +27,7 @@ router.post("/:id/comments", (req, res) => {
     res.status(400).json({ message: "Comment text is required" });
   }
   const photos = getPhotos();
-  const photo = photos.findIndex(
+  const photoIndex = photos.findIndex(
     (photo) => photo.id === parseInt(req.params.id)
   );
 

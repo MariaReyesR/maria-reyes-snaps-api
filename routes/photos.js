@@ -42,7 +42,7 @@ router.get("/:id/comments", (req, res) => {
 
 router.post("/:id/comments", (req, res) => {
   const { text, userName } = req.body;
-  if (!text || text.trim().length === "") {
+  if (!text || text.trim().length === 0) {
     return res.status(400).json({ message: "Comment text is required" });
   }
   const photos = getPhotos();

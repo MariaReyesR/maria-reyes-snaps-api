@@ -7,7 +7,7 @@ const tagsPath = path.join(process.cwd(), "data/tags.json");
 
 const getTags = () => JSON.parse(fs.readFileSync(tagsPath));
 
-router.get("/", (req, res) => {
+router.get("/", (_req, res) => {
   res.json(getTags());
 });
 

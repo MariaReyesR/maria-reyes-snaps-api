@@ -1,14 +1,13 @@
 import express from "express";
 import fs from "fs";
 import path from "path";
-import crypto from "crypto";
 
 const router = express.Router();
 router.use(express.json());
 const photosPath = path.join(process.cwd(), "data/photos.json");
 
 const getPhotos = () => {
-  const photos = JSON.parse(fs.readFileSync(photosPath));
+  const photos = JSON.parse(fs.readFileSync(photosPath, "utf-8"));
   return photos.map((photo) => ({
     ...photo,
     comments: photo.comments || [],
@@ -21,14 +20,12 @@ router.get("/", (req, res) => {
 
 router.get("/:id", (req, res) => {
   const photos = getPhotos();
-  const photoId = req.params.id;
-  const photo = photos.find((p) => p.id === photoId);
+  const photo = photos.find((p) => p.id === req.params.id);
 
   if (!photo) {
     res.status(404).json({ message: "Photo not found" });
-  } else {
-    res.json(photo);
   }
+  res.json({ ...photo, comments: photo.comments || [] });
 });
 
 router.get("/:id/comments", (req, res) => {
@@ -44,8 +41,8 @@ router.get("/:id/comments", (req, res) => {
 });
 
 router.post("/:id/comments", (req, res) => {
-  const { text } = req.body;
-  if (!text) {
+  const { text, userName } = req.body;
+  if (!text || text.trim().length === "") {
     return res.status(400).json({ message: "Comment text is required" });
   }
   const photos = getPhotos();
@@ -56,14 +53,17 @@ router.post("/:id/comments", (req, res) => {
   }
 
   const newComment = {
-    id: crypto.randomUUID(),
+    id: Date.now().toString(),
+    name: userName || "Anonymous",
     text,
     timestamp: new Date().toISOString(),
   };
 
-  photos[photoIndex].comments = photos[photoIndex].comments || [];
+  photos[photoIndex].comments ??= [];
   photos[photoIndex].comments.push(newComment);
+
   fs.writeFileSync(photosPath, JSON.stringify(photos, null, 2));
+
   res.status(201).json(newComment);
 });
 
